@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{--font-sans:Arial,"Helvetica Neue",sans-serif;--font-display:Arial,"Helvetica Neue",sans-serif;color-scheme:light}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f6f4ee;color:#0c0d0d;font-family:var(--font-sans);font-feature-settings:"ss01","cv01";text-rendering:optimizeLegibility}
+::selection{background:#d8ff63;color:#0c0d0d}
+.display{font-family:var(--font-display);letter-spacing:-.055em;font-weight:500}
+.hairline{border-color:rgba(12,13,13,.12)}
+.noise{position:relative}.noise:before{content:"";pointer-events:none;position:absolute;inset:0;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E")}
+.grid-bg{background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:42px 42px}
+.fade-up{animation:fadeUp .7s ease both}@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
