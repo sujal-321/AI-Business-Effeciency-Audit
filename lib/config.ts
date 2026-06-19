@@ -14,5 +14,5 @@ export const config = {
   webhookUrl: process.env.WEBHOOK_URL,
   agencyName: process.env.AGENCY_NAME ?? "Northstar AI",
   agencyAccent: process.env.AGENCY_ACCENT ?? "#275efe",
-  rateLimit: Number(process.env.AUDIT_RATE_LIMIT_PER_HOUR ?? 5),
+  rateLimit: (() => { const n = Number(process.env.AUDIT_RATE_LIMIT_PER_HOUR); return Number.isFinite(n) && n > 0 ? n : 5; })(),
 };

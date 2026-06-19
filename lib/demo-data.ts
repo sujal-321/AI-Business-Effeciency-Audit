@@ -4,21 +4,21 @@ const now = new Date();
 const ago = (days: number) => new Date(now.getTime() - days * 86_400_000).toISOString();
 
 export function createDemoResult(id: string, companyName: string, websiteUrl: string, email: string): AuditRecord {
-  const opportunities = [
-    ["Slow inbound lead response", "Deploy an AI lead concierge that qualifies, enriches, and routes every inquiry in under 60 seconds.", 32, 2400, 7000, "Low", "Now", "Lead generation"],
-    ["Manual prospect research", "Create an enrichment agent that builds account briefs and personalized outreach angles automatically.", 44, 3300, 5200, "Medium", "Now", "AI agents"],
-    ["Repeated support questions", "Ground a customer-facing assistant in approved service, pricing, and policy content with human handoff.", 58, 4350, 1800, "Medium", "Now", "Customer experience"],
-    ["Leads lost after first contact", "Run behavior-aware email and SMS nurture sequences with CRM status synchronization.", 26, 1950, 6400, "Low", "Now", "Lead generation"],
-    ["Reporting assembled by hand", "Unify sales, marketing, and delivery KPIs in an automated weekly executive digest.", 18, 1350, 900, "Low", "Next", "Data & reporting"],
-    ["Inconsistent sales proposals", "Generate on-brand proposals from discovery notes, approved case studies, and pricing guardrails.", 22, 1650, 3600, "Medium", "Next", "Operations"],
-    ["Unstructured customer feedback", "Classify calls, tickets, and reviews into themes, urgency, and product signals.", 20, 1500, 1200, "Medium", "Next", "Data & reporting"],
-    ["High-friction client onboarding", "Orchestrate forms, document collection, kickoff scheduling, and internal task creation.", 30, 2250, 1600, "Medium", "Next", "Operations"],
-    ["Content production bottleneck", "Build a human-reviewed content system from customer questions and search demand.", 35, 2625, 2500, "Medium", "Later", "Lead generation"],
-    ["Knowledge trapped across tools", "Deploy a permission-aware internal knowledge assistant for policies, process, and delivery playbooks.", 40, 3000, 1000, "High", "Later", "AI agents"],
-  ].map(([problem, solution, hours, savings, revenue, difficulty, priority, category]) => ({
-    problem: String(problem), solution: String(solution), hours_saved: Number(hours), cost_savings: Number(savings), revenue_opportunity: Number(revenue),
-    monthly_roi: Number(savings) + Number(revenue), annual_roi: (Number(savings) + Number(revenue)) * 12,
-    implementation_difficulty: difficulty as "Low" | "Medium" | "High", priority: priority as "Now" | "Next" | "Later", category: category as "Lead generation",
+  const opportunities = ([
+    ["Slow inbound lead response", "Deploy an AI lead concierge that qualifies, enriches, and routes every inquiry in under 60 seconds.", 32, 2400, 7000, "Low" as const, "Now" as const, "Lead generation" as const],
+    ["Manual prospect research", "Create an enrichment agent that builds account briefs and personalized outreach angles automatically.", 44, 3300, 5200, "Medium" as const, "Now" as const, "AI agents" as const],
+    ["Repeated support questions", "Ground a customer-facing assistant in approved service, pricing, and policy content with human handoff.", 58, 4350, 1800, "Medium" as const, "Now" as const, "Customer experience" as const],
+    ["Leads lost after first contact", "Run behavior-aware email and SMS nurture sequences with CRM status synchronization.", 26, 1950, 6400, "Low" as const, "Now" as const, "Lead generation" as const],
+    ["Reporting assembled by hand", "Unify sales, marketing, and delivery KPIs in an automated weekly executive digest.", 18, 1350, 900, "Low" as const, "Next" as const, "Data & reporting" as const],
+    ["Inconsistent sales proposals", "Generate on-brand proposals from discovery notes, approved case studies, and pricing guardrails.", 22, 1650, 3600, "Medium" as const, "Next" as const, "Operations" as const],
+    ["Unstructured customer feedback", "Classify calls, tickets, and reviews into themes, urgency, and product signals.", 20, 1500, 1200, "Medium" as const, "Next" as const, "Data & reporting" as const],
+    ["High-friction client onboarding", "Orchestrate forms, document collection, kickoff scheduling, and internal task creation.", 30, 2250, 1600, "Medium" as const, "Next" as const, "Operations" as const],
+    ["Content production bottleneck", "Build a human-reviewed content system from customer questions and search demand.", 35, 2625, 2500, "Medium" as const, "Later" as const, "Lead generation" as const],
+    ["Knowledge trapped across tools", "Deploy a permission-aware internal knowledge assistant for policies, process, and delivery playbooks.", 40, 3000, 1000, "High" as const, "Later" as const, "AI agents" as const],
+  ] as const).map(([problem, solution, hours, savings, revenue, difficulty, priority, category]) => ({
+    problem, solution, hours_saved: hours, cost_savings: savings, revenue_opportunity: revenue,
+    monthly_roi: savings + revenue, annual_roi: (savings + revenue) * 12,
+    implementation_difficulty: difficulty, priority, category,
   }));
 
   return {
@@ -61,4 +61,24 @@ export const seededAudits: AuditRecord[] = [
   createDemoResult("demo-acme", "Acme Advisory", "https://acme.example", "alex@acme.example"),
   createDemoResult("demo-luma", "Luma Health", "https://luma.example", "team@luma.example"),
   createDemoResult("demo-north", "North & Co.", "https://north.example", "hello@north.example"),
-].map((audit, index) => ({ ...audit, created_at: ago(index * 3 + 1), completed_at: ago(index * 3 + 1), opportunities: audit.opportunities?.map((o) => ({ ...o, monthly_roi: o.monthly_roi - index * 550, annual_roi: (o.monthly_roi - index * 550) * 12 })) }));
+].map((audit, index) => {
+  const deduction = index * 550;
+  return {
+    ...audit,
+    created_at: ago(index * 3 + 1),
+    completed_at: ago(index * 3 + 1),
+    opportunities: audit.opportunities?.map((o) => {
+      const total = o.cost_savings + o.revenue_opportunity;
+      const ratio = total > 0 ? o.cost_savings / total : 0.5;
+      const adjSavings = Math.round(o.cost_savings - deduction * ratio);
+      const adjRevenue = Math.round(o.revenue_opportunity - deduction * (1 - ratio));
+      return {
+        ...o,
+        cost_savings: adjSavings,
+        revenue_opportunity: adjRevenue,
+        monthly_roi: adjSavings + adjRevenue,
+        annual_roi: (adjSavings + adjRevenue) * 12,
+      };
+    }),
+  };
+});

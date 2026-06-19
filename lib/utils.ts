@@ -8,6 +8,10 @@ export function formatDate(value: string) {
 
 export function cn(...classes: Array<string | false | null | undefined>) { return classes.filter(Boolean).join(" "); }
 
+export function esc(value: string) {
+  return value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]!));
+}
+
 export async function retry<T>(operation: () => Promise<T>, attempts = 3, delayMs = 500): Promise<T> {
   let lastError: unknown;
   for (let attempt = 0; attempt < attempts; attempt += 1) {

@@ -1,8 +1,6 @@
 import { config } from "@/lib/config";
 import type { AuditRecord } from "@/lib/types";
-import { formatCurrency } from "@/lib/utils";
-
-const esc = (value: string) => value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]!));
+import { esc, formatCurrency } from "@/lib/utils";
 
 export function createReportHtml(audit: AuditRecord) {
   const total = audit.opportunities?.reduce((sum, item) => sum + item.monthly_roi, 0) ?? 0;

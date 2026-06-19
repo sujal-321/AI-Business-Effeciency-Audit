@@ -6,7 +6,7 @@ import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+    const ip = (request as { ip?: string }).ip ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
     const limit = checkRateLimit(ip); if (!limit.allowed) return NextResponse.json({ error: "Too many audits. Please try again later." }, { status: 429, headers: { "Retry-After": String(Math.ceil((limit.resetsAt - Date.now()) / 1000)) } });
     const parsed = auditInputSchema.safeParse(await request.json());
     if (!parsed.success) return NextResponse.json({ error: "Please check the submitted details.", fields: parsed.error.flatten().fieldErrors }, { status: 400 });

@@ -2,7 +2,9 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  const { token } = await request.json() as { token?: string }; const expected = process.env.ADMIN_TOKEN;
+  let token: string | undefined;
+  try { const body = await request.json(); token = typeof body?.token === "string" ? body.token : undefined; } catch { token = undefined; }
+  const expected = process.env.ADMIN_TOKEN;
   if (!expected) return NextResponse.json({ ok: true, demo: true });
   const providedBuffer = Buffer.from(token ?? ""); const expectedBuffer = Buffer.from(expected);
   const valid = providedBuffer.length === expectedBuffer.length && timingSafeEqual(providedBuffer, expectedBuffer);

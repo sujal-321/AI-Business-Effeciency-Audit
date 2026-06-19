@@ -32,7 +32,7 @@ class DemoRepository implements Repository {
     return { audits: items.slice((page - 1) * limit, page * limit), total: items.length };
   }
   async progress(id: string, status: AuditStatus, progress: number, currentStep: string) { const item = demoStore.get(id); if (item) demoStore.set(id, { ...item, status, progress, current_step: currentStep }); }
-  async complete(id: string, data: Omit<Parameters<Repository["complete"]>[1], never>) {
+  async complete(id: string, data: Parameters<Repository["complete"]>[1]) {
     const item = demoStore.get(id); if (!item) throw new Error("Audit not found");
     const complete: AuditRecord = { ...item, ...data, status: "completed", progress: 100, current_step: "Audit complete", completed_at: new Date().toISOString(), pdf_url: `/api/audits/${id}/pdf` };
     demoStore.set(id, complete); return complete;
@@ -77,12 +77,28 @@ function hydrate(row: Record<string, any>): AuditRecord {
   const report = Array.isArray(row.final_reports) ? row.final_reports[0] : row.final_reports;
   const profile = Array.isArray(row.business_profiles) ? row.business_profiles[0] : row.business_profiles;
   const seo = Array.isArray(row.seo_reports) ? row.seo_reports[0] : row.seo_reports;
-  return { ...row, profile, seo, competitors: row.competitors, opportunities: row.automation_opportunities, executive_summary: report?.executive_summary, roadmap: report?.roadmap, report_html: report?.report_html, pdf_url: report?.pdf_url } as AuditRecord;
+  return {
+    id: row.id, company_name: row.company_name, website_url: row.website_url, email: row.email,
+    status: row.status, progress: row.progress, current_step: row.current_step,
+    created_at: row.created_at, completed_at: row.completed_at, error: row.error,
+    profile, seo,
+    competitors: row.competitors ?? [],
+    opportunities: row.automation_opportunities ?? [],
+    executive_summary: report?.executive_summary ?? "",
+    roadmap: report?.roadmap ?? [],
+    report_html: report?.report_html ?? "",
+    pdf_url: report?.pdf_url ?? "",
+  };
 }
 
 let singleton: Repository | undefined;
 export function getRepository(): Repository {
   if (singleton) return singleton;
-  singleton = config.demoMode ? new DemoRepository() : new SupabaseRepository(createClient(config.supabaseUrl!, config.supabaseKey!, { auth: { persistSession: false } }));
+  if (!config.demoMode) {
+    if (!config.supabaseUrl || !config.supabaseKey) throw new Error("Supabase credentials required in production mode");
+    singleton = new SupabaseRepository(createClient(config.supabaseUrl, config.supabaseKey, { auth: { persistSession: false } }));
+  } else {
+    singleton = new DemoRepository();
+  }
   return singleton;
 }

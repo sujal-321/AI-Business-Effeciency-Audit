@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowRight, Bot, ChartNoAxesCombined, CircleCheck, Clock3, FileSearch, Gauge, Layers3, Search, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowDown, ArrowRight, Bot, ChartNoAxesCombined, CircleCheck, Clock3, FileSearch, Search, ShieldCheck, Sparkles } from "lucide-react";
 import { AuditForm } from "@/components/audit-form";
 import { SiteHeader } from "@/components/site-header";
 
