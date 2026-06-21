@@ -1,4 +1,4 @@
-import type { AuditRecord } from "@/lib/types";
+import type { AuditRecord, RedFlag } from "@/lib/types";
 
 const now = new Date();
 const ago = (days: number) => new Date(now.getTime() - days * 86_400_000).toISOString();
@@ -52,6 +52,12 @@ export function createDemoResult(id: string, companyName: string, websiteUrl: st
       { period: "30 days", title: "Capture the quick wins", actions: ["Launch lead qualification and routing", "Instrument conversion events and response SLAs", "Create the approved knowledge base"] },
       { period: "60 days", title: "Connect the revenue engine", actions: ["Automate nurture and proposal workflows", "Unify CRM lifecycle data", "Deploy weekly performance intelligence"] },
       { period: "90 days", title: "Scale the operating system", actions: ["Orchestrate onboarding and delivery handoffs", "Launch internal knowledge assistant", "Measure ROI and prioritize the second wave"] },
+    ],
+    red_flags: [
+      { title: "Full-service AI chatbot on day one", reason: "Without a curated knowledge base and escalation workflow, a chatbot will frustrate clients and damage trust. Start with structured triage before adding AI on the front line.", risk: "high" },
+      { title: "Automating high-touch sales outreach", reason: "Personal relationships drive conversions in consultative B2B. Blanket AI outreach risks damaging the personal relationships that close deals.", risk: "high" },
+      { title: "Replacing the CRM with an AI-native tool", reason: "CRM migrations fail even with dedicated teams. Layering AI on the existing stack delivers 80% of the value at 20% of the risk.", risk: "medium" },
+      { title: "Building custom AI agents for one-off tasks", reason: "Each bespoke agent creates ongoing maintenance cost. Favor configurable off-the-shelf tools that solve the same problem with a proven playbook.", risk: "medium" },
     ],
     report_html: "", pdf_url: `/api/audits/${id}/pdf`,
   };

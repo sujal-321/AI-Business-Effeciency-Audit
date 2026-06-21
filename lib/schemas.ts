@@ -28,9 +28,16 @@ export const opportunityListSchema = z.object({ opportunities: z.array(z.object(
   category: z.enum(["Lead generation", "Customer experience", "Operations", "AI agents", "Data & reporting"]),
 })).min(10) });
 
+export const redFlagSchema = z.object({
+  title: z.string(),
+  reason: z.string(),
+  risk: z.enum(["high", "medium", "low"]),
+});
+
 export const reportNarrativeSchema = z.object({
   executive_summary: z.string(),
   roadmap: z.array(z.object({ period: z.enum(["30 days", "60 days", "90 days"]), title: z.string(), actions: z.array(z.string()).min(2) })).length(3),
+  red_flags: z.array(redFlagSchema).min(3).max(6),
 });
 
 export type AuditInput = z.infer<typeof auditInputSchema>;

@@ -14,6 +14,7 @@ export function createReportHtml(audit: AuditRecord) {
   <h2>Competitive landscape</h2>${audit.competitors?.map((x) => `<div class="item"><h3>${esc(x.competitor_name)}</h3><p><b>Where they lead:</b> ${x.strengths.map(esc).join(" · ")}<br><b>Opening:</b> ${x.opportunities.map(esc).join(" · ")}</p></div>`).join("")}
   <h2>Automation portfolio</h2>${audit.opportunities?.map((x, i) => `<div class="item"><span class="pill">${esc(x.priority)}</span><h3>${i + 1}. ${esc(x.problem)}</h3><p>${esc(x.solution)}</p><p><b>${x.hours_saved} hours/mo · ${formatCurrency(x.monthly_roi)}/mo upside · ${esc(x.implementation_difficulty)} complexity</b></p></div>`).join("")}
   <h2>Recommended AI roadmap</h2>${audit.roadmap?.map((x) => `<div class="item"><div class="eyebrow">${esc(x.period)}</div><h3>${esc(x.title)}</h3><p>${x.actions.map(esc).join(" · ")}</p></div>`).join("")}
+  <h2>What NOT to automate</h2><p>Not every opportunity is worth pursuing. These routes carry hidden complexity, compliance risk, or a poor return on attention.</p>${audit.red_flags?.map((x) => `<div class="item"><span class="pill" style="background:#fee7e7;color:#b91c1c">${esc(x.risk)} risk</span><h3>${esc(x.title)}</h3><p>${esc(x.reason)}</p></div>`).join("")}
   <h2>Final recommendation</h2><p>Start with one visible revenue workflow and one internal capacity workflow. Establish baseline metrics before launch, review weekly, and only scale automations that demonstrate measurable adoption and business impact.</p>
   </main></body></html>`;
 }

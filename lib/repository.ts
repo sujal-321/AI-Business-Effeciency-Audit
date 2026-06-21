@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { config } from "@/lib/config";
 import { seededAudits } from "@/lib/demo-data";
-import type { AuditRecord, AuditStatus, AutomationOpportunity, BusinessProfile, Competitor, RoadmapItem, SeoReport } from "@/lib/types";
+import type { AuditRecord, AuditStatus, AutomationOpportunity, BusinessProfile, Competitor, RedFlag, RoadmapItem, SeoReport } from "@/lib/types";
 
 type ListOptions = { search?: string; status?: string; page?: number; limit?: number };
 
@@ -10,7 +10,7 @@ interface Repository {
   get(id: string): Promise<AuditRecord | null>;
   list(options?: ListOptions): Promise<{ audits: AuditRecord[]; total: number }>;
   progress(id: string, status: AuditStatus, progress: number, currentStep: string): Promise<void>;
-  complete(id: string, data: { profile: BusinessProfile; seo: SeoReport; competitors: Competitor[]; opportunities: AutomationOpportunity[]; executive_summary: string; roadmap: RoadmapItem[]; report_html: string }): Promise<AuditRecord>;
+  complete(id: string, data: { profile: BusinessProfile; seo: SeoReport; competitors: Competitor[]; opportunities: AutomationOpportunity[]; executive_summary: string; roadmap: RoadmapItem[]; red_flags: RedFlag[]; report_html: string }): Promise<AuditRecord>;
   fail(id: string, message: string): Promise<void>;
 }
 
@@ -58,11 +58,11 @@ class SupabaseRepository implements Repository {
   }
   async progress(id: string, status: AuditStatus, progress: number, currentStep: string) { const { error } = await this.db.from("audits").update({ status, progress, current_step: currentStep }).eq("id", id); if (error) throw error; }
   async complete(id: string, payload: Parameters<Repository["complete"]>[1]) {
-    const { profile, seo, competitors, opportunities, executive_summary, roadmap, report_html } = payload;
+    const { profile, seo, competitors, opportunities, executive_summary, roadmap, red_flags, report_html } = payload;
     const calls = [
       this.db.from("business_profiles").upsert({ audit_id: id, ...profile }), this.db.from("seo_reports").upsert({ audit_id: id, ...seo }),
       this.db.from("competitors").delete().eq("audit_id", id), this.db.from("automation_opportunities").delete().eq("audit_id", id),
-      this.db.from("final_reports").upsert({ audit_id: id, executive_summary, roadmap, report_html, pdf_url: `/api/audits/${id}/pdf` }),
+      this.db.from("final_reports").upsert({ audit_id: id, executive_summary, roadmap, red_flags, report_html, pdf_url: `/api/audits/${id}/pdf` }),
     ];
     const results = await Promise.all(calls); const failed = results.find((result) => result.error); if (failed?.error) throw failed.error;
     const inserts = await Promise.all([this.db.from("competitors").insert(competitors.map((x) => ({ audit_id: id, ...x }))), this.db.from("automation_opportunities").insert(opportunities.map((x) => ({ audit_id: id, ...x })))]);
@@ -86,6 +86,7 @@ function hydrate(row: Record<string, any>): AuditRecord {
     opportunities: row.automation_opportunities ?? [],
     executive_summary: report?.executive_summary ?? "",
     roadmap: report?.roadmap ?? [],
+    red_flags: report?.red_flags ?? [],
     report_html: report?.report_html ?? "",
     pdf_url: report?.pdf_url ?? "",
   };

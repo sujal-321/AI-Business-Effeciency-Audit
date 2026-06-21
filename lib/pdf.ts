@@ -77,6 +77,21 @@ export async function generateAuditPdf(audit: AuditRecord): Promise<Buffer> {
       opportunities.slice(start, start + 5).forEach((item, localIndex) => { const index = start + localIndex; const y = 153 + localIndex * 124; doc.circle(left + 13, y + 14, 12).fill(item.priority === "Now" ? colors.blue : "#D5D9E0"); doc.font("Helvetica-Bold").fontSize(8).fillColor(item.priority === "Now" ? colors.white : colors.ink).text(String(index + 1), left + 7, y + 11, { width: 12, align: "center", lineBreak: false }); doc.font("Helvetica-Bold").fontSize(12).fillColor(colors.ink).text(clip(item.problem, 70), left + 42, y, { width: 330, lineBreak: false }); doc.font("Helvetica-Bold").fontSize(12).fillColor(colors.blue).text(formatCurrency(item.monthly_roi), width - 150, y, { width: 96, align: "right", lineBreak: false }); doc.font("Helvetica").fontSize(8).fillColor(colors.gray).text(`${item.category.toUpperCase()}  /  ${item.hours_saved} HRS/MO  /  ${item.implementation_difficulty.toUpperCase()}`, left + 42, y + 24, { characterSpacing: .35, lineBreak: false }); doc.fontSize(9).fillColor("#4C5158").text(clip(item.solution, 175), left + 42, y + 49, { width: content - 42, height: 44, lineGap: 3, ellipsis: true }); doc.font("Helvetica-Bold").fontSize(8).fillColor(colors.ink).text(`${formatCurrency(item.annual_roi)} ANNUAL VALUE`, left + 42, y + 96, { lineBreak: false }); if (localIndex < 4) doc.moveTo(left + 42, y + 113).lineTo(width - left, y + 113).strokeColor("#E4E6EA").stroke(); });
     }
 
+    // What NOT to automate
+    const redFlags = audit.red_flags ?? [];
+    if (redFlags.length > 0) {
+      newPage("What NOT to automate", "Risk & caution");
+      doc.font("Helvetica").fontSize(9.5).fillColor(colors.gray).text("Not every opportunity is worth pursuing. These routes carry hidden complexity, compliance risk, or a poor return on attention.", left, 148, { width: content, lineGap: 3 });
+      redFlags.slice(0, 4).forEach((item, index) => {
+        const y = 200 + index * 130;
+        doc.roundedRect(left, y, content, 108, 10).strokeColor("#E5E0D8").lineWidth(1).stroke();
+        doc.rect(left, y, 6, 108).fill(item.risk === "high" ? "#DC2626" : "#F59E0B");
+        doc.font("Helvetica-Bold").fontSize(9).fillColor(item.risk === "high" ? "#DC2626" : "#D97706").text(`${item.risk.toUpperCase()} RISK`, left + 22, y + 14, { characterSpacing: .8, lineBreak: false });
+        doc.font("Helvetica-Bold").fontSize(13).fillColor(colors.ink).text(clip(item.title, 68), left + 22, y + 34, { width: content - 40, lineBreak: false });
+        doc.font("Helvetica").fontSize(9).fillColor(colors.gray).text(clip(item.reason, 200), left + 22, y + 60, { width: content - 50, height: 40, lineGap: 2, ellipsis: true });
+      });
+    }
+
     // Roadmap
     newPage("Recommended AI roadmap", "90-day plan");
     (audit.roadmap ?? []).slice(0, 3).forEach((item, index) => { const y = 152 + index * 167; doc.roundedRect(left, y, content, 140, 11).fill(index === 0 ? colors.ink : colors.pale); doc.rect(left, y, 7, 140).fill(index === 0 ? colors.lime : colors.blue); doc.font("Helvetica-Bold").fontSize(8.5).fillColor(index === 0 ? colors.lime : colors.blue).text(item.period.toUpperCase(), left + 25, y + 22, { characterSpacing: 1, lineBreak: false }); doc.fontSize(15).fillColor(index === 0 ? colors.white : colors.ink).text(clip(item.title, 55), left + 25, y + 44, { lineBreak: false }); doc.font("Helvetica").fontSize(9).fillColor(index === 0 ? "#B8BDC4" : colors.gray).text(item.actions.slice(0, 3).map((action) => `- ${clip(action, 82)}`).join("\n"), left + 25, y + 72, { width: content - 50, height: 52, lineGap: 3, ellipsis: true }); });

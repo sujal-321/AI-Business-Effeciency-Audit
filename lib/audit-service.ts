@@ -19,7 +19,7 @@ export async function processAudit(id: string) {
       for (const [status, progress, step] of [["scraping", 18, "Reading priority website pages"], ["analyzing", 38, "Building the business profile"], ["seo", 55, "Scoring website and search readiness"], ["opportunities", 74, "Modeling automation opportunities"], ["reporting", 91, "Assembling the consulting report"]] as const) { await repo.progress(id, status, progress, step); await wait(260); }
       const result = createDemoResult(id, audit.company_name, audit.website_url, audit.email);
       const report_html = createReportHtml(result);
-      const complete = await repo.complete(id, { profile: result.profile!, seo: result.seo!, competitors: result.competitors!, opportunities: result.opportunities!, executive_summary: result.executive_summary!, roadmap: result.roadmap!, report_html });
+      const complete = await repo.complete(id, { profile: result.profile!, seo: result.seo!, competitors: result.competitors!, opportunities: result.opportunities!, executive_summary: result.executive_summary!, roadmap: result.roadmap!, red_flags: result.red_flags!, report_html });
       logger.info("audit.completed", { auditId: id }); return complete;
     }
     await repo.progress(id, "scraping", 15, "Reading priority website pages"); const site = await scrapeWebsite(audit.website_url);

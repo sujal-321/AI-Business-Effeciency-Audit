@@ -3,7 +3,7 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import { config } from "@/lib/config";
 import { businessProfileSchema, competitorListSchema, opportunityListSchema, reportNarrativeSchema, seoReportSchema } from "@/lib/schemas";
 import { retry } from "@/lib/utils";
-import type { AutomationOpportunity, BusinessProfile, Competitor, RoadmapItem, ScrapedSite, SeoReport } from "@/lib/types";
+import type { AutomationOpportunity, BusinessProfile, Competitor, RedFlag, RoadmapItem, ScrapedSite, SeoReport } from "@/lib/types";
 
 let client: OpenAI | undefined;
 function openai() {
@@ -53,9 +53,9 @@ export async function analyzeOpportunities(profile: BusinessProfile): Promise<Au
   return result.opportunities.map((item) => ({ ...item, monthly_roi: item.cost_savings + item.revenue_opportunity, annual_roi: (item.cost_savings + item.revenue_opportunity) * 12 }));
 }
 
-export async function writeNarrative(companyName: string, profile: BusinessProfile, seo: SeoReport, opportunities: AutomationOpportunity[]): Promise<{ executive_summary: string; roadmap: RoadmapItem[] }> {
+export async function writeNarrative(companyName: string, profile: BusinessProfile, seo: SeoReport, opportunities: AutomationOpportunity[]): Promise<{ executive_summary: string; roadmap: RoadmapItem[]; red_flags: RedFlag[] }> {
   const top = [...opportunities].sort((a, b) => b.monthly_roi - a.monthly_roi).slice(0, 6);
   return structured("report_narrative", reportNarrativeSchema,
     `You are a partner at a premium AI transformation consultancy. Write decisive, useful prose without hype. ${evidenceRule}`,
-    `Create an executive summary and a cumulative 30/60/90-day roadmap for ${companyName}. PROFILE:${JSON.stringify(profile)} SEO:${JSON.stringify(seo)} PRIORITIES:${JSON.stringify(top)}`);
+    `Create an executive summary, a cumulative 30/60/90-day roadmap, and 3-6 "red flag" items — automations that seem appealing but would be low-ROI or high-risk for this business. Be specific about why each would underperform. PROFILE:${JSON.stringify(profile)} SEO:${JSON.stringify(seo)} PRIORITIES:${JSON.stringify(top)}`);
 }

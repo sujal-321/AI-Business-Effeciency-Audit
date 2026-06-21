@@ -39,6 +39,12 @@ export interface AutomationOpportunity {
 
 export interface RoadmapItem { period: "30 days" | "60 days" | "90 days"; title: string; actions: string[] }
 
+export interface RedFlag {
+  title: string;
+  reason: string;
+  risk: "high" | "medium" | "low";
+}
+
 export interface AuditRecord {
   id: string;
   company_name: string;
@@ -56,6 +62,7 @@ export interface AuditRecord {
   opportunities?: AutomationOpportunity[];
   executive_summary?: string;
   roadmap?: RoadmapItem[];
+  red_flags?: RedFlag[];
   report_html?: string;
   pdf_url?: string;
 }
